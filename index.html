@@ -99,7 +99,7 @@
   .progress { height: 10px; background: #f1ece2; border-radius: 999px; overflow: hidden; margin-bottom: 24px; }
   .progress div { height: 100%; width: 0; background: linear-gradient(90deg, #ffb347, var(--primary)); transition: width .3s; }
 
-  .question { text-align: center; padding: 10px 0 6px; }
+  .question { text-align: center; padding: 0; }
   .expr { font-size: 64px; font-weight: bold; letter-spacing: 2px; }
   .expr .op { color: var(--accent); margin: 0 10px; }
   .expr .eq { color: #bbb; margin: 0 10px; }
@@ -126,6 +126,10 @@
   .feedback.ok { color: var(--ok); font-weight: bold; }
   .feedback.bad { color: var(--bad); }
   .actions { text-align: center; }
+  #submitBtn { min-width: 200px; }
+  @media (max-width: 520px) {
+    #submitBtn { min-width: 160px; }
+  }
 
   .result { text-align: center; }
   .stars { font-size: 48px; letter-spacing: 6px; margin: 10px 0; }
