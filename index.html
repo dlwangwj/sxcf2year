@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>二年级乘法速算</title>
+<style>
+  :root {
+    --primary: #ff7a45;
+    --primary-dark: #e8602a;
+    --accent: #4f8cff;
+    --ok: #2fbf71;
+    --bad: #ff4d4f;
+    --ink: #333;
+    --muted: #8a8a8a;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: "Microsoft YaHei", "PingFang SC", "Noto Sans SC", sans-serif;
+    color: var(--ink);
+    background: linear-gradient(135deg, #fff3d6 0%, #ffe0e6 50%, #dbeeff 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 12px 40px;
+  }
+  h1 {
+    margin: 0 0 16px;
+    font-size: 32px;
+    color: var(--primary-dark);
+    text-shadow: 2px 2px 0 #fff;
+  }
+  nav { display: flex; gap: 10px; margin-bottom: 20px; }
+  .tab {
+    border: none;
+    padding: 10px 24px;
+    border-radius: 999px;
+    font-size: 16px;
+    cursor: pointer;
+    background: #fff;
+    color: var(--ink);
+    box-shadow: 0 3px 0 #e0d6c4;
+    transition: transform .1s;
+  }
+  .tab.active { background: var(--primary); color: #fff; box-shadow: 0 3px 0 var(--primary-dark); }
+  .tab:active { transform: translateY(2px); }
+
+  .card {
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, .1);
+    padding: 28px;
+    width: 100%;
+    max-width: 560px;
+  }
+  .hidden { display: none !important; }
+
+  /* ---------- 练习 ---------- */
+  .label { font-size: 15px; color: var(--muted); margin: 0 0 10px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 18px; }
+  .chip {
+    width: 48px; height: 48px;
+    border-radius: 14px;
+    border: 2px solid #ffd9c4;
+    background: #fff;
+    font-size: 20px;
+    font-weight: bold;
+    color: #bbb;
+    cursor: pointer;
+  }
+  .chip.on { border-color: var(--primary); background: var(--primary); color: #fff; }
+  .row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 18px; }
+  select {
+    font-size: 16px;
+    padding: 8px 12px;
+    border-radius: 10px;
+    border: 2px solid #ffd9c4;
+    background: #fff;
+  }
+  .btn {
+    border: none;
+    padding: 12px 28px;
+    font-size: 18px;
+    border-radius: 14px;
+    cursor: pointer;
+    background: var(--primary);
+    color: #fff;
+    box-shadow: 0 4px 0 var(--primary-dark);
+    transition: transform .1s, box-shadow .1s;
+  }
+  .btn:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--primary-dark); }
+  .btn:disabled { background: #ccc; box-shadow: 0 4px 0 #aaa; cursor: not-allowed; }
+  .btn.blue { background: var(--accent); box-shadow: 0 4px 0 #2f6bd6; }
+
+  .status { display: flex; justify-content: space-between; font-size: 16px; color: var(--muted); margin-bottom: 8px; }
+  .status b { color: var(--primary-dark); font-size: 18px; }
+  .progress { height: 10px; background: #f1ece2; border-radius: 999px; overflow: hidden; margin-bottom: 24px; }
+  .progress div { height: 100%; width: 0; background: linear-gradient(90deg, #ffb347, var(--primary)); transition: width .3s; }
+
+  .question { text-align: center; padding: 10px 0 6px; }
+  .expr { font-size: 64px; font-weight: bold; letter-spacing: 2px; }
+  .expr .op { color: var(--accent); margin: 0 10px; }
+  .expr .eq { color: #bbb; margin: 0 10px; }
+  .answer-box {
+    width: 160px;
+    font-size: 48px;
+    text-align: center;
+    padding: 6px;
+    border: none;
+    border-bottom: 4px dashed var(--primary);
+    outline: none;
+    background: transparent;
+    color: var(--ink);
+    font-family: inherit;
+  }
+  .answer-box:focus { border-bottom-style: solid; }
+  .answer-box.shake { animation: shake .35s; }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-8px); }
+    75% { transform: translateX(8px); }
+  }
+  .feedback { min-height: 60px; margin: 16px 0 20px; text-align: center; font-size: 18px; line-height: 1.6; }
+  .feedback.ok { color: var(--ok); font-weight: bold; }
+  .feedback.bad { color: var(--bad); }
+  .actions { text-align: center; }
+
+  .result { text-align: center; }
+  .stars { font-size: 48px; letter-spacing: 6px; margin: 10px 0; }
+  .score-big { font-size: 56px; font-weight: bold; color: var(--primary-dark); margin: 6px 0; }
+  .result p { color: var(--muted); margin: 6px 0 18px; }
+  .wrong-list { text-align: left; margin: 0 0 22px; padding: 0; list-style: none; }
+  .wrong-list li {
+    background: #fff4f4;
+    border-left: 5px solid var(--bad);
+    padding: 10px 14px;
+    border-radius: 10px;
+    margin-bottom: 8px;
+    font-size: 16px;
+  }
+  .wrong-list .kj { color: var(--muted); font-size: 14px; margin-left: 6px; }
+
+  /* ---------- 口诀表 ---------- */
+  .table-hint { text-align: center; color: var(--muted); margin: 0 0 14px; }
+  .detail {
+    min-height: 74px;
+    margin-bottom: 18px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, #e6f0ff, #fff);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+  .detail .formula { font-size: 28px; font-weight: bold; color: var(--accent); }
+  .detail .kj { font-size: 22px; color: var(--primary-dark); margin-top: 4px; }
+  .mul-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; align-items: center; }
+  .mul-row .idx { width: 34px; font-weight: bold; color: var(--muted); }
+  .cell {
+    width: 84px;
+    padding: 8px 0;
+    border: 2px solid #ffe4d4;
+    border-radius: 12px;
+    background: #fff;
+    font-family: inherit;
+    font-size: 16px;
+    cursor: pointer;
+    color: var(--ink);
+  }
+  .cell:hover { background: #fff3ec; }
+  .cell.on { background: var(--primary); border-color: var(--primary); color: #fff; }
+
+  @media (max-width: 520px) {
+    .expr { font-size: 48px; }
+    .card { padding: 20px; }
+    .cell { width: 74px; }
+  }
+</style>
+</head>
+<body>
+  <h1>✨ 二年级乘法速算 ✨</h1>
+
+  <nav>
+    <button class="tab active" data-tab="quiz">口算练习</button>
+    <button class="tab" data-tab="table">九九乘法表</button>
+  </nav>
+
+  <!-- 口算练习 -->
+  <section id="quiz" class="card">
+    <!-- 设置 -->
+    <div id="setup">
+      <p class="label">选择要练习的乘数（点击切换）</p>
+      <div class="chips" id="chips"></div>
+      <div class="row">
+        <label class="label" for="count">题数：</label>
+        <select id="count">
+          <option value="10" selected>10 题</option>
+          <option value="20">20 题</option>
+          <option value="30">30 题</option>
+        </select>
+      </div>
+      <div class="actions">
+        <button class="btn" id="startBtn">开始练习</button>
+      </div>
+    </div>
+
+    <!-- 答题 -->
+    <div id="play" class="hidden">
+      <div class="status">
+        <span>第 <b id="curNo">1</b> / <span id="totalNo">10</span> 题</span>
+        <span>得分 <b id="score">0</b></span>
+      </div>
+      <div class="progress"><div id="bar"></div></div>
+
+      <div class="question">
+        <div class="expr">
+          <span id="qa">3</span><span class="op">×</span><span id="qb">4</span><span class="eq">=</span>
+          <input id="answer" class="answer-box" type="number" inputmode="numeric" autocomplete="off" placeholder="?">
+        </div>
+      </div>
+
+      <div class="feedback" id="feedback"></div>
+      <div class="actions">
+        <button class="btn blue" id="submitBtn">提交</button>
+      </div>
+    </div>
+
+    <!-- 结果 -->
+    <div id="result" class="result hidden">
+      <div class="stars" id="stars"></div>
+      <div class="score-big"><span id="finalScore">0</span> / <span id="finalTotal">10</span></div>
+      <p id="comment"></p>
+      <p class="label hidden" id="wrongTitle">做错的题目：</p>
+      <ul class="wrong-list" id="wrongList"></ul>
+      <button class="btn" id="againBtn">再练一次</button>
+    </div>
+  </section>
+
+  <!-- 九九乘法表 -->
+  <section id="table" class="card hidden">
+    <p class="table-hint">点击任意一个算式，看看它的口诀吧！</p>
+    <div class="detail" id="detail">
+      <div class="formula">点一点，看口诀</div>
+    </div>
+    <div id="grid"></div>
+  </section>
+
+<script>
+  /* ---------- 工具函数：口诀 ---------- */
+  const CN = ['零', '一', '二', '三', '四', '五', '六', '七', '八', '九'];
+
+  // 把 0~81 的积转成汉字，如 12 -> 十二，20 -> 二十，10 -> 一十
+  function prodCn(p) {
+    if (p < 10) return CN[p];
+    const tens = Math.floor(p / 10);
+    const ones = p % 10;
+    let s = tens === 1 ? (ones === 0 ? '一十' : '十') : CN[tens] + '十';
+    if (ones) s += CN[ones];
+    return s;
+  }
+
+  // 生成口诀：小数在前，积 < 10 用“得”，积 >= 10 直接读
+  function kouJue(a, b) {
+    const lo = Math.min(a, b);
+    const hi = Math.max(a, b);
+    const p = a * b;
+    return p < 10
+      ? `${CN[lo]}${CN[hi]}得${CN[p]}`
+      : `${CN[lo]}${CN[hi]}${prodCn(p)}`;
+  }
+
+  /* ---------- 切换标签 ---------- */
+  document.querySelectorAll('.tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('quiz').classList.toggle('hidden', btn.dataset.tab !== 'quiz');
+      document.getElementById('table').classList.toggle('hidden', btn.dataset.tab !== 'table');
+    });
+  });
+
+  /* ---------- 口算练习 ---------- */
+  const NUMS = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+  const selected = new Set(NUMS);   // 默认全部乘数
+  const chipsEl = document.getElementById('chips');
+
+  NUMS.forEach(n => {
+    const b = document.createElement('button');
+    b.className = 'chip on';
+    b.textContent = n;
+    b.addEventListener('click', () => {
+      if (selected.has(n)) selected.delete(n); else selected.add(n);
+      b.classList.toggle('on', selected.has(n));
+    });
+    chipsEl.appendChild(b);
+  });
+
+  const el = id => document.getElementById(id);
+  const state = { total: 10, idx: 0, score: 0, wrong: [], q: null, answered: false };
+
+  function randomPick(arr) {
+    return arr[Math.floor(Math.random() * arr.length)];
+  }
+
+  function newQuestion() {
+    const pool = [...selected];
+    return { a: randomPick(pool), b: randomPick(pool) };
+  }
+
+  function startQuiz() {
+    if (selected.size === 0) {
+      alert('请至少选择一个乘数哦！');
+      return;
+    }
+    Object.assign(state, { total: Number(el('count').value), idx: 0, score: 0, wrong: [] });
+    el('totalNo').textContent = state.total;
+    el('finalTotal').textContent = state.total;
+    el('setup').classList.add('hidden');
+    el('result').classList.add('hidden');
+    el('play').classList.remove('hidden');
+    renderQuestion();
+  }
+
+  function renderQuestion() {
+    state.q = newQuestion();
+    state.answered = false;
+    el('qa').textContent = state.q.a;
+    el('qb').textContent = state.q.b;
+    el('curNo').textContent = state.idx + 1;
+    el('score').textContent = state.score;
+    el('bar').style.width = (state.idx / state.total * 100) + '%';
+
+    const input = el('answer');
+    input.value = '';
+    input.disabled = false;
+    input.focus();
+
+    el('feedback').textContent = '';
+    el('feedback').className = 'feedback';
+    el('submitBtn').textContent = '提交';
+    el('submitBtn').disabled = false;
+  }
+
+  function submit() {
+    if (state.answered) {
+      next();
+      return;
+    }
+    const input = el('answer');
+    const raw = input.value.trim();
+    if (raw === '') {
+      input.classList.remove('shake');
+      void input.offsetWidth;          // 重新触发动画
+      input.classList.add('shake');
+      input.focus();
+      return;
+    }
+
+    const { a, b } = state.q;
+    const right = a * b;
+    const ok = Number(raw) === right;
+    const fb = el('feedback');
+    state.answered = true;
+    input.disabled = true;
+
+    if (ok) {
+      state.score++;
+      el('score').textContent = state.score;
+      fb.className = 'feedback ok';
+      fb.textContent = randomPick(['太棒了！🎉', '真聪明！⭐', '回答正确！👏', '你好厉害！🌟']);
+    } else {
+      state.wrong.push({ a, b, right, kj: kouJue(a, b) });
+      fb.className = 'feedback bad';
+      fb.innerHTML = `再想想哦 😅<br>正确答案是 <b>${right}</b>，口诀：${kouJue(a, b)}`;
+    }
+    el('submitBtn').textContent = state.idx + 1 === state.total ? '查看结果' : '下一题';
+  }
+
+  function next() {
+    state.idx++;
+    if (state.idx >= state.total) {
+      showResult();
+    } else {
+      renderQuestion();
+    }
+  }
+
+  function showResult() {
+    el('play').classList.add('hidden');
+    el('result').classList.remove('hidden');
+    el('bar').style.width = '100%';
+
+    const rate = state.score / state.total;
+    const starCount = rate === 1 ? 3 : rate >= 0.6 ? 2 : 1;
+    el('stars').textContent = '⭐'.repeat(starCount) + '☆'.repeat(3 - starCount);
+    el('finalScore').textContent = state.score;
+    el('comment').textContent = rate === 1 ? '全部答对，你是乘法小能手！'
+      : rate >= 0.6 ? '做得不错，再多练练会更快哦！'
+      : '别灰心，多练习就会越来越熟练！';
+
+    const list = el('wrongList');
+    list.innerHTML = '';
+    el('wrongTitle').classList.toggle('hidden', state.wrong.length === 0);
+    state.wrong.forEach(w => {
+      const li = document.createElement('li');
+      li.innerHTML = `${w.a} × ${w.b} = ${w.right}<span class="kj">${w.kj}</span>`;
+      list.appendChild(li);
+    });
+  }
+
+  el('startBtn').addEventListener('click', startQuiz);
+  el('againBtn').addEventListener('click', () => {
+    el('result').classList.add('hidden');
+    el('setup').classList.remove('hidden');
+  });
+  el('submitBtn').addEventListener('click', submit);
+  el('answer').addEventListener('keydown', e => {
+    if (e.key === 'Enter') submit();
+  });
+
+  /* ---------- 九九乘法表 ---------- */
+  const grid = el('grid');
+  const detail = el('detail');
+
+  for (let i = 1; i <= 9; i++) {
+    const row = document.createElement('div');
+    row.className = 'mul-row';
+    const idx = document.createElement('span');
+    idx.className = 'idx';
+    idx.textContent = i + '×';
+    row.appendChild(idx);
+
+    for (let j = 1; j <= i; j++) {
+      const cell = document.createElement('button');
+      cell.className = 'cell';
+      cell.textContent = `${j}×${i}=${i * j}`;
+      cell.addEventListener('click', () => {
+        document.querySelectorAll('.cell.on').forEach(c => c.classList.remove('on'));
+        cell.classList.add('on');
+        detail.innerHTML =
+          `<div class="formula">${j} × ${i} = ${i * j}</div>` +
+          `<div class="kj">${kouJue(i, j)}</div>`;
+      });
+      row.appendChild(cell);
+    }
+    grid.appendChild(row);
+  }
+</script>
+</body>
+</html>
